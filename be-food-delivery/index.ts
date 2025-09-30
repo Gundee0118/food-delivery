@@ -10,9 +10,10 @@ import { AdminRouter } from "./router/admin.route";
 
 const databaseConnect = async () => {
   try {
-    await mongoose.connect(
-      "mongodb+srv://eternalbeat89:Gundee18@cluster0.qkuh2qr.mongodb.net/foodDelivery"
-    );
+    const mongoUri =
+      process.env.MONGODB_URI ||
+      "mongodb+srv://eternalbeat89:Gundee18@cluster0.qkuh2qr.mongodb.net/foodDelivery";
+    await mongoose.connect(mongoUri);
     console.log("successfully db connected");
   } catch (err) {
     console.log(err);
@@ -31,6 +32,8 @@ server.use(FoodRouter);
 server.use(OrderRouter);
 server.use(AdminRouter);
 
-server.listen(8000, () => {
-  console.log(`running on http://localhost:8000`);
+const PORT = process.env.PORT || 8000;
+
+server.listen(PORT, () => {
+  console.log(`running on http://localhost:${PORT}`);
 });
