@@ -6,6 +6,8 @@ import { useAuth } from "./UserProvider";
 import { Payment } from "./Payment";
 import { format } from "date-fns";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 type OrderType = {
   totalPrice: number;
   foodName: string;
@@ -34,7 +36,7 @@ export const PendingDelivered = () => {
 
     try {
       const { data } = await axios.get(
-        `http://localhost:8000/getOrder?userId=${user.userId}`
+        `${API_BASE}/getOrder?userId=${user.userId}`
       );
 
       const newOrders = data.orders;

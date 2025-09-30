@@ -8,6 +8,8 @@ import { Checkbox } from "../../../components/ui/checkbox";
 import { ChevronDown, ChevronUp, Calendar, Truck } from "lucide-react";
 import axios from "axios";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 interface OrderItem {
   food: {
     _id: string;
@@ -81,7 +83,7 @@ export default function OrdersPage() {
         return;
       }
 
-      const response = await axios.get("http://localhost:8000/getOrders", {
+      const response = await axios.get(`${API_BASE}/getOrders`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -134,7 +136,7 @@ export default function OrdersPage() {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:8000/updateOrderState/${orderId}`,
+        `${API_BASE}/updateOrderState/${orderId}`,
         { deliveryState: newState },
         {
           headers: {
@@ -166,7 +168,7 @@ export default function OrdersPage() {
       await Promise.all(
         selectedOrders.map((orderId) =>
           axios.put(
-            `http://localhost:8000/updateOrderState/${orderId}`,
+            `${API_BASE}/updateOrderState/${orderId}`,
             { deliveryState: bulkUpdateStatus },
             {
               headers: {

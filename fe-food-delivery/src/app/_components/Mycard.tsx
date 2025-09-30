@@ -18,6 +18,8 @@ import { useAuth } from "./UserProvider";
 import { Textarea } from "@/components/ui/textarea";
 import { LoginModal } from "./LoginModal";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 type addFoodType = {
   foodName: string;
   image: string;
@@ -122,7 +124,7 @@ export const Mycard = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:8000/createOrder",
+        `${API_BASE}/createOrder`,
         {
           userId: user.userId,
           address,

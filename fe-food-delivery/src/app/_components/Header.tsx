@@ -22,6 +22,8 @@ import {
 import { useAuth } from "./UserProvider";
 import axios from "axios";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 type FoodProps = {
   foodName: string;
   image: string;
@@ -49,7 +51,7 @@ export const Header = () => {
 
     try {
       const { data } = await axios.get(
-        `http://localhost:8000/getOrder?userId=${user.userId}`
+        `${API_BASE}/getOrder?userId=${user.userId}`
       );
 
       const newOrders = data.orders;
