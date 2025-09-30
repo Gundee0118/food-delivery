@@ -22,9 +22,9 @@ import {
 import { CloudinaryUpload } from "@/components/CloudinaryUpload";
 import { Pen, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
+import axios from "axios";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-import axios from "axios";
 
 interface EditDishProps {
   food: {
