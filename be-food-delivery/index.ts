@@ -27,7 +27,8 @@ server.use(
   cors({
     origin: [
       "http://localhost:3000",
-      // Vercel URL нэмэх (deploy хийсний дараа)
+      "https://food-delivery-4bje-ghegs5fu4-gundees-projects.vercel.app",
+      "https://food-delivery-4bje.vercel.app",
     ],
     credentials: true,
   })
