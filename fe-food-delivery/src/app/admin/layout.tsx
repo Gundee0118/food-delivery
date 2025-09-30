@@ -1,14 +1,8 @@
+"use client";
+
 import { Menu, Truck } from "lucide-react";
-import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-
-// import { FoodCartProvider } from "./_components/FoodCartProvider";
-
-export const metadata: Metadata = {
-  title: "admin",
-  description: "admin",
-};
 
 export default function RootLayout({
   children,
