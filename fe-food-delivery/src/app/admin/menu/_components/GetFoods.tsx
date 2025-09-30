@@ -67,13 +67,19 @@ export const FoodType = ({ foods }: Props) => {
         });
         setCategories(categoriesRes.data.categories);
       } catch (err) {
+        console.log("Error fetching categories:", err);
+      }
+
+      try {
+        // Foods татах
         const response = await axios.get(`${API_BASE}/foods`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
         setFoods(response.data.foods);
-        console.log(err, "errtr");
+      } catch (err) {
+        console.log("Error fetching foods:", err);
       }
     };
     fetchData();

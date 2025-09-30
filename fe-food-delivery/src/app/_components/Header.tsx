@@ -210,16 +210,38 @@ export const Header = () => {
             </div>
             <Popover>
               <PopoverTrigger asChild>
-                <User className="bg-[#EF4444] rounded-full h-[36px] w-[36px]" />
+                <User className="bg-[#EF4444] rounded-full h-[36px] w-[36px] cursor-pointer" />
               </PopoverTrigger>
               <PopoverContent>
-                <div className="h-[104px] mt-10 rounded-md w-[188px] bg-[#FFFFFF]">
-                  <div className="flex flex-col items-center justify-center gap-3 py-3">
-                    <p> {email ? email : "No user"}</p>
-                    <Button className="bg-[#F4F4F5] rounded-full text-[#18181B]">
-                      Sign out
-                    </Button>
-                  </div>
+                <div className="mt-10 rounded-md w-[188px] bg-[#FFFFFF]">
+                  {user?.userId ? (
+                    <div className="flex flex-col items-center justify-center gap-3 py-3">
+                      <p className="text-sm">{email}</p>
+                      <Button
+                        className="bg-[#F4F4F5] rounded-full text-[#18181B] hover:bg-[#E4E4E7]"
+                        onClick={() => {
+                          localStorage.removeItem("token");
+                          localStorage.removeItem("email");
+                          setEmail("");
+                          window.location.href = "/";
+                        }}
+                      >
+                        Sign out
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center gap-3 py-3">
+                      <p className="text-sm text-gray-600">No user</p>
+                      <Button
+                        className="bg-[#EF4444] rounded-full text-white hover:bg-[#DC2626]"
+                        onClick={() => {
+                          window.location.href = "/login";
+                        }}
+                      >
+                        Login
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </PopoverContent>
             </Popover>
