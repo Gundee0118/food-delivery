@@ -25,11 +25,17 @@ const server = express();
 server.use(express.json());
 server.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "https://food-delivery-4bje-ghegs5fu4-gundees-projects.vercel.app",
-      "https://food-delivery-4bje.vercel.app",
-    ],
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      // Allow localhost and all Vercel domains
+      if (origin.includes("localhost") || origin.includes("vercel.app")) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
