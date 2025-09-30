@@ -23,7 +23,15 @@ const databaseConnect = async () => {
 
 const server = express();
 server.use(express.json());
-server.use(cors());
+server.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      // Vercel URL нэмэх (deploy хийсний дараа)
+    ],
+    credentials: true,
+  })
+);
 databaseConnect();
 
 server.use(UserRouter);
