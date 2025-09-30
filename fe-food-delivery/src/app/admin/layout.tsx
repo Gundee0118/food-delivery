@@ -16,8 +16,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="flex h-screen w-full bg-[#F4F4F5CC]">
-      <div className="flex flex-col gap-15 w-[20%] h-screen bg-white">
+    <div className="flex min-h-screen w-full bg-[#F4F4F5CC]">
+      <div className="flex flex-col gap-15 w-[20%] min-h-screen bg-white">
         <p className="py-8 px-5">
           <Image src={"/logo.png"} alt={"log"} width={170} height={50} />
         </p>
@@ -36,7 +36,7 @@ export default function RootLayout({
           Orders
         </Link>
       </div>
-      <div className="w-[80%]"> {children}</div>
+      <div className="w-[80%] overflow-y-auto"> {children}</div>
     </div>
   );
 }

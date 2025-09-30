@@ -1,9 +1,9 @@
 import { model, Model, models, Schema } from "mongoose";
 
 enum FoodOrderStatusEnum {
-  PENDING = "PENDING",
-  DELIVERED = "DELIVERED",
-  CANCELED = "CANCELED",
+  PENDING = "Pending",
+  DELIVERED = "Delivered",
+  CANCELLED = "Cancelled",
 }
 type FoodOrderItemModelType = {
   quantity: number;
@@ -15,7 +15,7 @@ type FoodOrderModelType = {
   totalPrice: number;
   foodOrderItems: FoodOrderItemModelType[];
   status: FoodOrderStatusEnum;
-  address:string
+  address: string;
 };
 const FoodOrderItemSchema = new Schema<FoodOrderItemModelType>(
   {
@@ -33,7 +33,7 @@ const FoodOrderSchema = new Schema<FoodOrderModelType>(
     user: { type: Schema.Types.ObjectId, ref: "Users", required: true },
     totalPrice: { type: Number, required: true },
     foodOrderItems: { type: [FoodOrderItemSchema], required: true },
-    address:{type:String, required:true},
+    address: { type: String, required: true },
     status: {
       type: String,
       enum: Object.values(FoodOrderStatusEnum),

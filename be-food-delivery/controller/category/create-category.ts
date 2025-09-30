@@ -8,7 +8,7 @@ export const createCategory = async (req: Request, res: Response) => {
     const newCategory = await CategoryModel.create({ categoryName });
     res.status(200).send({
       message: "successfully created category",
-      category: newCategory,
+      categories: newCategory,
     });
   } catch (err) {
     res.send({

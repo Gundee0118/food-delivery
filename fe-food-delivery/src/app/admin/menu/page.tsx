@@ -5,7 +5,7 @@ import { FoodType } from "./_components/GetFoods";
 const MenuHomepage = async () => {
   const { data } = await axios.get("http://localhost:8000/foods");
   return (
-    <div className="flex flex-col w-[95%] mx-6 my-15 gap-4">
+    <div className="flex flex-col w-[95%] mx-6 py-8 gap-6 min-h-screen">
       <div className="">
         <GetCategory />
       </div>

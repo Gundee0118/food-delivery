@@ -4,18 +4,20 @@ import { FoodOrderModel } from "../../model/order.model";
 
 export const getOrderByUserId = async (req: Request, res: Response) => {
   const { userId } = req.query;
-  console.log(userId, "userid");
 
   try {
     const allOrderByUserId = await FoodOrderModel.find({
       user: userId,
-    }).populate({
-      path: "foodOrderItems",
-      populate: {
-        path: "food",
-        model: "Foods",
-      },
-    });
+    })
+      .populate({
+        path: "foodOrderItems",
+        populate: {
+          path: "food",
+          model: "Foods",
+        },
+      })
+      .lean();
+
     res.status(200).send({ orders: allOrderByUserId });
   } catch (err) {
     console.log(err);

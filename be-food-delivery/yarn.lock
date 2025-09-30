@@ -741,6 +741,11 @@ mongodb@~6.16.0:
     bson "^6.10.3"
     mongodb-connection-string-url "^3.0.0"
 
+mongoos@^0.0.1-security:
+  version "0.0.1-security"
+  resolved "https://registry.npmjs.org/mongoos/-/mongoos-0.0.1-security.tgz"
+  integrity sha512-bRrqG68DaRaGYsf9wLDqwrzoPfckn9012r6QFTaadOGz/5fmI5lmrnJt4B1NhhGbk8ZXvBEtLNFscM4fo1TAFA==
+
 mongoose@^8.15.1:
   version "8.15.1"
   resolved "https://registry.npmjs.org/mongoose/-/mongoose-8.15.1.tgz"

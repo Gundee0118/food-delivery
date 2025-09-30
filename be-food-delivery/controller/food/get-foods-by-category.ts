@@ -28,6 +28,7 @@ export const getFoodsByCategory=async(req:Request, res:Response)=>{
                 image: "$image",
                 price: "$price",
                 ingredients: "$ingredients",
+                category: "$category",
               },
             },
           },

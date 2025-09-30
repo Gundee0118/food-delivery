@@ -1,17 +1,23 @@
-import {Router}from"express"
+import { Router } from "express";
+import { getOrders } from "../controller/order/get-orders";
+import { getOrderByUserId } from "../controller/order/get-order-by-userId";
+import { createOrder } from "../controller/order/create-order";
+import { updateOrderState } from "../controller/order/update-order-state";
+import { authMiddleware } from "../middleware/auth";
 
-import { checkOtp, sendOtp, updatePassword } from "../controller/user/forgot"
+const router = Router();
 
-import { tokenChecker } from "../middleware/token-checker"
-import { createOrder } from "../controller/order/create-order"
-import { getOrderByUserId } from "../controller/order/get-order-by-userId"
+// Get all orders (admin only)
+router.get("/getOrders", authMiddleware, getOrders);
 
+// Get orders by user ID
+router.get("/getOrder", getOrderByUserId);
 
+// Create new order
+router.post("/createOrder", createOrder);
 
+// Update order state (admin only)
+router.put("/updateOrderState/:orderId", authMiddleware, updateOrderState);
 
-export const OrderRouter=Router()
-
-
-
-OrderRouter.post("/createOrder",createOrder)
-OrderRouter.get("/getOrder",getOrderByUserId)
+export { router as OrderRouter };
+export default router;

@@ -5,13 +5,22 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 
 export default function Home() {
-  const [foodData, setFoodData] = useState<any>();
-  const getData = async () => {
-    const res = await axios.get("http://localhost:8000/foods");
-    console.log(res, "hellooo");
+  const [foodData, setFoodData] = useState<any>({});
+  const [loading, setLoading] = useState(true);
 
-    setFoodData(res.data);
+  const getData = async () => {
+    try {
+      const res = await axios.get("http://localhost:8000/foods");
+      console.log(res, "hellooo");
+      setFoodData(res.data);
+    } catch (error) {
+      console.error("Error fetching foods:", error);
+      setFoodData({});
+    } finally {
+      setLoading(false);
+    }
   };
+
   useEffect(() => {
     getData();
   }, []);
@@ -26,11 +35,16 @@ export default function Home() {
           // width={1440}
           // height={570}
           fill
+          sizes="100vw"
           className="object-cover"
         />
       </div>
       <div className="bg-[#404040] py-1">
-        <Card foods={foodData} />
+        {loading ? (
+          <div className="text-white text-center py-10">Loading...</div>
+        ) : (
+          <Card foods={foodData} />
+        )}
       </div>
     </div>
   );

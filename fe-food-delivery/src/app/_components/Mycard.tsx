@@ -1,18 +1,22 @@
 "use client";
 
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Minus, Plus, ShoppingCart, X } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { AddFood } from "./AddFood";
 import { useEffect, useState } from "react";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Address } from "./Address";
 import { Payment } from "./Payment";
 import { PendingDelivered } from "./PendingDelivered";
 import axios from "axios";
 import { useAuth } from "./UserProvider";
 import { Textarea } from "@/components/ui/textarea";
+import { LoginModal } from "./LoginModal";
 
 type addFoodType = {
   foodName: string;
@@ -30,13 +34,30 @@ export const Mycard = () => {
   const { user } = useAuth();
   const [address, setAddress] = useState("");
   const [isAddressInvalid, setIsAddressInvalid] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
-    const existingData = localStorage.getItem("foodOrderCard");
-    if (existingData) {
-      const parsed = JSON.parse(existingData);
-      setCartItems(parsed);
-    }
+    const loadCartData = () => {
+      const existingData = localStorage.getItem("foodOrderCard");
+      if (existingData) {
+        const parsed = JSON.parse(existingData);
+        setCartItems(parsed);
+      }
+    };
+
+    // Load initial cart data
+    loadCartData();
+
+    // Listen for cart updates
+    const handleCartUpdate = () => {
+      loadCartData();
+    };
+
+    window.addEventListener("cartUpdated", handleCartUpdate);
+
+    return () => {
+      window.removeEventListener("cartUpdated", handleCartUpdate);
+    };
   }, []);
 
   useEffect(() => {
@@ -50,6 +71,8 @@ export const Mycard = () => {
   const updateCart = (newChart: addFoodType[]) => {
     setCartItems(newChart);
     localStorage.setItem(storageKey, JSON.stringify(newChart));
+    // Trigger cart update event
+    window.dispatchEvent(new CustomEvent("cartUpdated"));
   };
   const increaseQty = (index: number) => {
     const newChart = [...cartItems];
@@ -71,6 +94,20 @@ export const Mycard = () => {
   };
   const checkOutSubmit = async () => {
     console.log("is being called");
+
+    // Check if user is logged in
+    if (!user?.userId) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    // Check if address is provided
+    if (!address.trim()) {
+      setIsAddressInvalid(true);
+      alert("Хүргэлтийн хаягаа оруулна уу!");
+      return;
+    }
+
     const backEndData = cartItems.map((food) => ({
       food: food._id,
       quantity: food.quantity,
@@ -82,7 +119,6 @@ export const Mycard = () => {
 
     const token = localStorage.getItem("token");
     console.log(token, "from checkout");
-    if (!user?.userId) return;
 
     try {
       const res = await axios.post(
@@ -106,49 +142,55 @@ export const Mycard = () => {
       setCartItems([]);
       localStorage.setItem("foodOrderCard", "[]");
       setAddress("");
+
+      // Trigger order update event
+      window.dispatchEvent(new CustomEvent("orderUpdated"));
     } catch (error) {
       alert("Захиалга илгээхэд алдаа гарлаа");
       console.error(error, "//saaxaaxa");
     }
   };
 
-  const clearCard = () => setCartItems([]);
-
-  //   <div className="flex justify-center p-2">
-  //   {user?.userId ? (
-  //     <CheckOutDialog
-  //       CloseOrderCard={CloseOrderCard}
-  //       checkOutSubmit={checkOutSubmit}
-  //     />
-  //   ) : (
-  //     <DetailLogCart />
-  //   )}
-  // </div>
-
-  // console.log(cartItems, "cartitems");
   return (
     <div>
+      <LoginModal open={showLoginModal} onOpenChange={setShowLoginModal} />
       <Sheet>
         <SheetTrigger asChild>
           <ShoppingCart className="bg-white rounded-full h-[36px] w-[36px]" />
         </SheetTrigger>
-        <SheetContent className="bg-[#404040] overflow-y-scroll w-[535px]">
-          <div className="flex w-full max-w-sm flex-col gap-6">
-            <Tabs defaultValue="account" className="flex gap-5 p-5">
-              <p className="flex text-white">
-                <ShoppingCart /> Order detail
-              </p>
-              <TabsList className="w-full">
-                <TabsTrigger value="account" className="active:bg-red-500">
+        <SheetContent className="bg-[#404040] overflow-y-auto w-[535px] h-screen">
+          <SheetTitle className="sr-only">Order Details</SheetTitle>
+          <SheetDescription className="sr-only">
+            View your cart and order history
+          </SheetDescription>
+          <div className="flex w-full flex-col gap-6 p-4 items-center">
+            <div className="flex items-center justify-center gap-2 text-white mb-4 w-full">
+              <ShoppingCart className="h-5 w-5" />
+              <span className="text-lg font-semibold">Order detail</span>
+            </div>
+            <Tabs defaultValue="account" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-6 mx-auto max-w-xs">
+                <TabsTrigger
+                  value="account"
+                  className="data-[state=active]:bg-red-500 data-[state=active]:text-white"
+                >
                   Cart
                 </TabsTrigger>
-                <TabsTrigger value="password">Order</TabsTrigger>
+                <TabsTrigger
+                  value="password"
+                  className="data-[state=active]:bg-red-500 data-[state=active]:text-white"
+                >
+                  Order
+                </TabsTrigger>
               </TabsList>
-              <TabsContent value="account" className="flex flex-col gap-4">
-                <>
-                  {/* <div className="flex flex-col gap-4"> */}
-                  <div className=" bg-white rounded-md p-3">
-                    <p className="text-[#71717A] pb-3">My card</p>
+              <TabsContent value="account" className="space-y-6">
+                <div className="bg-white rounded-lg">
+                  <div className="p-6">
+                    <h3 className="text-lg font-semibold text-gray-700">
+                      My cart
+                    </h3>
+                  </div>
+                  <div>
                     {cartItems?.map((el: addFoodType, index: number) => {
                       return (
                         <AddFood
@@ -161,33 +203,48 @@ export const Mycard = () => {
                         />
                       );
                     })}
+                    {cartItems.length === 0 && (
+                      <div className="text-center py-12 px-6">
+                        <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                          <img
+                            src="/s.png"
+                            alt="Empty cart"
+                            className="w-16 h-16 object-contain"
+                          />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-800 mb-3">
+                          Your cart is empty
+                        </h3>
+                        <p className="text-gray-600 text-sm">
+                          Hungry? 🍕 Add some delicious dishes to your cart and
+                          satisfy your cravings!
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  {/* </div> */}
-                </>
-                <div className=" bg-white pt-4 rounded-md items-center">
-                  <h2 className="text-[#71717A]">Delivery location</h2>
-                  <Textarea
-                    value={address}
-                    onChange={(el) => {
-                      setAddress(el.target.value);
-                      if (el.target.value.trim().length > 0) {
-                        setIsAddressInvalid(false); // address бичих үед алдааг арилгана
-                      }
-                    }}
-                    placeholder="Please complete your address"
-                    className={`
-      ${address ? "border border-red-500" : ""}
-      mt-2
-    `}
-                  ></Textarea>
+                  {cartItems.length > 0 && (
+                    <div className="p-6">
+                      <h3 className="text-lg font-semibold text-gray-700 mb-4">
+                        Delivery location
+                      </h3>
+                      <Textarea
+                        placeholder="Please share your complete address"
+                        value={address}
+                        onChange={(e) => setAddress(e.target.value)}
+                        className="w-full min-h-[100px] border-gray-300 focus:border-red-500 focus:ring-red-500"
+                      />
+                      {isAddressInvalid && (
+                        <p className="text-red-500 text-sm mt-2">
+                          Please enter your delivery address
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <Payment totalPrice={totalPrice} />
-                <Button onClick={checkOutSubmit}>Checkout</Button>
+                <Payment totalPrice={totalPrice} onCheckout={checkOutSubmit} />
               </TabsContent>
               <TabsContent value="password">
-                <div className="h-[800] bg-white rounded-md w-full p-5">
-                  <PendingDelivered />
-                </div>
+                <PendingDelivered />
               </TabsContent>
             </Tabs>
           </div>

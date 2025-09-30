@@ -1,11 +1,16 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import Image from "next/image";
 import { Dispatch, SetStateAction, useState } from "react";
 import { FoodProps } from "./Card";
 import { Plus, ShoppingCart } from "lucide-react";
-import { DialogTitle } from "@radix-ui/react-dialog";
 
 type FoodDetailPropsType = {
   foodName: string;
@@ -57,7 +62,7 @@ export const FoodDetail = ({
     if (isFoodExisting) {
       const newFoods = cartItems.map((food) => {
         if (food._id === foodId) {
-          return { ...food, qty: food.quantity + counter };
+          return { ...food, quantity: food.quantity + counter };
         } else {
           return food;
         }
@@ -66,14 +71,14 @@ export const FoodDetail = ({
     } else {
       const newFoods = [
         ...cartItems,
-        { foodName, price, image, _id, quantity: counter },
+        { foodName, price, image, ingredients, _id, quantity: counter },
       ];
       localStorage.setItem(storageKey, JSON.stringify(newFoods));
     }
-    const totalQuantity = cartItems.reduce(
-      (acc, item) => acc + item.quantity,
-      0
-    );
+
+    // Trigger cart update event
+    window.dispatchEvent(new CustomEvent("cartUpdated"));
+
     setOpen(false);
   };
   console.log(foodName);
@@ -81,11 +86,20 @@ export const FoodDetail = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <form>
-        <DialogTitle>Food</DialogTitle>
         <DialogContent className=" !w-max-fit m-4 !w-[600px] !max-w-[600px]">
+          <DialogTitle className="sr-only">Food Details</DialogTitle>
+          <DialogDescription className="sr-only">
+            View and add food to cart
+          </DialogDescription>
           <div className="flex gap-4">
             <div className="relative w-1/2 h-[240px]">
-              <Image src={image} alt={foodName} fill className="rounded-xl" />
+              <Image
+                src={image}
+                alt={foodName}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="rounded-xl"
+              />
             </div>
             <div className="flex flex-col gap-2 w-1/2">
               <div className="flex flex-col justify-between">
@@ -95,7 +109,9 @@ export const FoodDetail = ({
               <div className="flex justify-between">
                 <div>
                   <div className="text-[16px]">Total price</div>
-                  <h3 className="text-[#09090B] text-[24px]">{price}</h3>
+                  <h3 className="text-[#09090B] text-[24px]">
+                    ${(price * counter).toLocaleString()}
+                  </h3>
                 </div>
                 <div>
                   <Button
