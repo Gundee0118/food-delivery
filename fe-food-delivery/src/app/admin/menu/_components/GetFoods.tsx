@@ -25,6 +25,8 @@ import { Pen, Plus } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 type FoodType = {
   _id: string;
   foodName: string;
@@ -58,17 +60,14 @@ export const FoodType = ({ foods }: Props) => {
       const token = window?.localStorage?.getItem("token");
       try {
         // Categories татах
-        const categoriesRes = await axios.get(
-          "http://localhost:8000/categories",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const categoriesRes = await axios.get(`${API_BASE}/categories`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setCategories(categoriesRes.data.categories);
       } catch (err) {
-        const response = await axios.get("http://localhost:8000/foods", {
+        const response = await axios.get(`${API_BASE}/foods`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -84,7 +83,7 @@ export const FoodType = ({ foods }: Props) => {
     const token = localStorage.getItem("token");
     try {
       const res = await axios.post(
-        "http://localhost:8000/addFood",
+        `${API_BASE}/addFood`,
         {
           ...foodData,
           category: selectedCategory,

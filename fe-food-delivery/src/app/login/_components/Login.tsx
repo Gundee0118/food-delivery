@@ -9,6 +9,8 @@ import axios from "axios";
 import { redirect, useRouter } from "next/navigation";
 import { useAuth } from "@/app/_components/UserProvider";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 export const Login = () => {
   const { user, tokenChecker } = useAuth();
   const router = useRouter();
@@ -19,7 +21,7 @@ export const Login = () => {
     },
     onSubmit: async (values) => {
       try {
-        const response = await axios.post("http://localhost:8000/login", {
+        const response = await axios.post(`${API_BASE}/login`, {
           email: values.email,
           password: values.password,
         });

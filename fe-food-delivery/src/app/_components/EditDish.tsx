@@ -22,6 +22,8 @@ import {
 import { CloudinaryUpload } from "@/components/CloudinaryUpload";
 import { Pen, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 import axios from "axios";
 
 interface EditDishProps {
@@ -64,7 +66,7 @@ export function EditDish({ food, onUpdate }: EditDishProps) {
     const fetchCategories = async () => {
       const token = localStorage.getItem("token");
       try {
-        const res = await axios.get("http://localhost:8000/categories", {
+        const res = await axios.get(`${API_BASE}/categories`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setCategories(res.data.categories);
@@ -89,7 +91,7 @@ export function EditDish({ food, onUpdate }: EditDishProps) {
 
     try {
       const response = await axios.put(
-        `http://localhost:8000/foods/${food._id}`,
+        `${API_BASE}/foods/${food._id}`,
         foodData,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -119,12 +121,9 @@ export function EditDish({ food, onUpdate }: EditDishProps) {
     }
 
     try {
-      const response = await axios.delete(
-        `http://localhost:8000/foods/${food._id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await axios.delete(`${API_BASE}/foods/${food._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       console.log("Delete response:", response.data);
       alert("Хоол амжилттай устгагдлаа!");

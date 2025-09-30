@@ -9,6 +9,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as Yup from "yup";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 const validationSchemaLogin = Yup.object({
   password: Yup.string()
     .min(6, "Password must be at least 6 characters")
@@ -33,7 +36,7 @@ export const Form2 = ({ backHandler, email }: PropsType) => {
     validationSchema: validationSchemaLogin,
     onSubmit: async (values) => {
       try {
-        const response = await axios.post("http://localhost:8000/signup", {
+        const response = await axios.post(`${API_BASE}/signup`, {
           email: email,
           password: values.password,
         });

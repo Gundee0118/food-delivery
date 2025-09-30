@@ -24,6 +24,9 @@ import {
 } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
 import { CloudinaryUpload } from "@/components/CloudinaryUpload";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 type categoryType = {
   _id: string;
   categoryName: string;
@@ -49,7 +52,7 @@ export const GetCategory = () => {
     const token = localStorage?.getItem("token");
 
     try {
-      const res = await axios.get("http://localhost:8000/categories", {
+      const res = await axios.get(`${API_BASE}/categories`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -79,7 +82,7 @@ export const GetCategory = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:8000/addCategory",
+        `${API_BASE}/addCategory`,
         { categoryName: addCategory },
         {
           headers: {
@@ -102,7 +105,7 @@ export const GetCategory = () => {
     const token = localStorage.getItem("token");
     try {
       const res = await axios.post(
-        "http://localhost:8000/addFood",
+        `${API_BASE}/addFood`,
         {
           ...foodData,
           category: selectedCategory,

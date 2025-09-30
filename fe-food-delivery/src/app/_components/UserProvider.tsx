@@ -10,6 +10,8 @@ import {
   useContext,
 } from "react";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 type UserData = {
   userId: string;
   isAdmin: boolean;
@@ -29,7 +31,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const tokenChecker = async (token: string) => {
     try {
       const response = await axios.post(
-        "http://localhost:8000/verify",
+        `${API_BASE}/verify`,
         {},
         {
           headers: {

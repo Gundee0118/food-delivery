@@ -4,13 +4,15 @@ import { Card } from "./_components/Card";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 export default function Home() {
   const [foodData, setFoodData] = useState<any>({});
   const [loading, setLoading] = useState(true);
 
   const getData = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/foods");
+      const res = await axios.get(`${API_BASE}/foods`);
       console.log(res, "hellooo");
       setFoodData(res.data);
     } catch (error) {
