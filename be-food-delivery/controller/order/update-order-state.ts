@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { FoodOrderModel } from "../../model/order.model";
+import { io } from "../../index";
 
 export const updateOrderState = async (
   req: Request,
@@ -33,6 +34,14 @@ export const updateOrderState = async (
       });
       return;
     }
+
+    // Socket event emit
+    const userIdString = order.user?.toString();
+    io.emit("orderStatusChanged", {
+      orderId: order._id.toString(),
+      userId: userIdString,
+      newStatus: order.status,
+    });
 
     res.status(200).json({
       success: true,

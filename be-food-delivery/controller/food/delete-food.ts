@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { FoodModel } from "../../model/food.model";
+import { io } from "../../index";
 
 export const deleteFood = async (
   req: Request,
@@ -14,6 +15,9 @@ export const deleteFood = async (
       res.status(404).send({ message: "Хоол олдсонгүй" });
       return;
     }
+
+    // Real-time notification to all clients
+    io.emit("foodDeleted", { _id: id });
 
     res.status(200).send({
       message: "Хоол амжилттай устгагдлаа",

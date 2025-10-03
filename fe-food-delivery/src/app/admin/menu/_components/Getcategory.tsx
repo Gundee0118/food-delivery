@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -23,7 +22,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
-import { CloudinaryUpload } from "@/components/CloudinaryUpload";
+import { AddFoodModal } from "./AddFoodModal";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -42,6 +41,7 @@ export const GetCategory = () => {
   // Хоол нэмэх state
   const [foodDialogOpen, setFoodDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategoryName, setSelectedCategoryName] = useState("");
   const [foodData, setFoodData] = useState({
     foodName: "",
     image: "",
@@ -146,6 +146,13 @@ export const GetCategory = () => {
               className="rounded-full border-2 border-gray-200 bg-white text-gray-700 hover:border-red-500 hover:bg-red-50 hover:text-red-600 transition-all duration-200 px-4 py-2 h-10"
               onClick={() => {
                 setSelectedCategory(el._id);
+                setSelectedCategoryName(el.categoryName);
+                setFoodData({
+                  foodName: "",
+                  image: "",
+                  ingredients: "",
+                  price: 0,
+                });
                 setFoodDialogOpen(true);
               }}
             >
@@ -197,86 +204,14 @@ export const GetCategory = () => {
       </Dialog>
 
       {/* Хоол нэмэх Dialog */}
-      <Dialog open={foodDialogOpen} onOpenChange={setFoodDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add new food</DialogTitle>
-            <DialogDescription>
-              Add a new dish to the selected category
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="foodName">Food Name</Label>
-              <Input
-                id="foodName"
-                value={foodData.foodName}
-                onChange={(e) =>
-                  setFoodData({
-                    ...foodData,
-                    foodName: e.target.value,
-                  })
-                }
-                placeholder="Enter food name"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="image">Food Image</Label>
-              <CloudinaryUpload
-                onImageUpload={(imageUrl) =>
-                  setFoodData({
-                    ...foodData,
-                    image: imageUrl,
-                  })
-                }
-                currentImage={foodData.image}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="ingredients">Ingredients</Label>
-              <Textarea
-                id="ingredients"
-                value={foodData.ingredients}
-                onChange={(e) =>
-                  setFoodData({
-                    ...foodData,
-                    ingredients: e.target.value,
-                  })
-                }
-                placeholder="Enter ingredients"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="price">Price ($)</Label>
-              <div className="relative">
-                <Input
-                  id="price"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={foodData.price || ""}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setFoodData({
-                      ...foodData,
-                      price: value === "" ? 0 : parseFloat(value),
-                    });
-                  }}
-                  placeholder="0.00"
-                  className="pr-8"
-                />
-                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
-                  $
-                </span>
-              </div>
-              <p className="text-xs text-gray-500">Жишээ: 15000, 25000.50</p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button onClick={handleAddFood}>Add Food</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AddFoodModal
+        open={foodDialogOpen}
+        onOpenChange={setFoodDialogOpen}
+        categoryName={selectedCategoryName}
+        foodData={foodData}
+        onFoodDataChange={setFoodData}
+        onSubmit={handleAddFood}
+      />
     </div>
   );
 };

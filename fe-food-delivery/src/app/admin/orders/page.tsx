@@ -87,9 +87,8 @@ export default function OrdersPage() {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        timeout: 10000, // 10 seconds timeout
+        timeout: 10000,
       });
-      console.log("Orders data:", response.data.orders);
       setOrders(response.data.orders || []);
     } catch (error) {
       console.error("Error fetching orders:", error);
@@ -206,8 +205,11 @@ export default function OrdersPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg">Loading orders...</div>
+      <div className="flex items-center justify-center h-screen">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-gray-900 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-700 text-lg">Loading orders...</p>
+        </div>
       </div>
     );
   }
@@ -350,9 +352,6 @@ export default function OrdersPage() {
                     <div
                       className="food-modal-trigger flex items-center gap-2 cursor-pointer hover:bg-gray-100 rounded p-1 transition-colors"
                       onClick={(e) => {
-                        console.log("Clicking order:", order._id);
-                        console.log("Current clickedOrderId:", clickedOrderId);
-
                         const rect = e.currentTarget.getBoundingClientRect();
                         setModalPosition({
                           top: rect.bottom + window.scrollY + 5,
@@ -361,7 +360,6 @@ export default function OrdersPage() {
 
                         const newId =
                           clickedOrderId === order._id ? null : order._id;
-                        console.log("Setting to:", newId);
                         setClickedOrderId(newId);
                       }}
                     >
@@ -384,7 +382,7 @@ export default function OrdersPage() {
                       onChange={(e) =>
                         updateDeliveryState(order._id, e.target.value)
                       }
-                      className="text-sm border border-gray-300 rounded px-3 py-2 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="text-sm font-medium rounded-md px-3 py-2 border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 cursor-pointer"
                     >
                       <option value="Pending">Pending</option>
                       <option value="Delivered">Delivered</option>
@@ -616,13 +614,13 @@ export default function OrdersPage() {
             </p>
 
             <div className="mb-6">
-              <label className="block text-sm font-medium mb-2">
-                Select Status
+              <label className="block text-sm font-medium mb-2 text-gray-700">
+                Select New Status
               </label>
               <select
                 value={bulkUpdateStatus}
                 onChange={(e) => setBulkUpdateStatus(e.target.value)}
-                className="w-full p-2 border rounded-lg"
+                className="w-full px-3 py-2 font-medium rounded-md border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 cursor-pointer"
               >
                 <option value="Pending">Pending</option>
                 <option value="Delivered">Delivered</option>

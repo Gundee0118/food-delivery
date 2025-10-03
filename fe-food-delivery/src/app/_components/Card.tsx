@@ -39,11 +39,11 @@ export const Card = ({ foods }: PropsType) => {
 
         return (
           <div className="flex flex-col" key={el}>
-            <div className="px-28 py-10">
-              <h2 className="text-4xl text-[#FFFFFF]">{el}</h2>
+            <div className="px-28 pt-8 pb-6">
+              <h2 className="text-3xl text-[#FFFFFF] font-bold">{el}</h2>
             </div>
             {
-              <div className="flex flex-wrap grid-cols-3 items-center justify-center gap-4">
+              <div className="flex flex-wrap grid-cols-3 items-center justify-center gap-6 pb-12">
                 {(() => {
                   const categoryFoods =
                     actualFoods[el as keyof typeof actualFoods];
@@ -70,10 +70,12 @@ export const Card = ({ foods }: PropsType) => {
                             />
                           </div>
                           <div className="flex justify-between">
-                            <div className="text-[#EF4444]">
+                            <div className="text-[#09090B] font-semibold">
                               {food.foodName}
                             </div>
-                            <div className="text-[#09090B]">${food.price}</div>
+                            <div className="text-[#09090B] font-bold">
+                              ${food.price}
+                            </div>
                           </div>
                           <div className="text-[#09090B]">
                             {food.ingredients}

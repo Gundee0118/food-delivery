@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { FoodModel } from "../../model/food.model";
+import { io } from "../../index";
 
 export const updateFood = async (
   req: Request,
@@ -19,6 +20,9 @@ export const updateFood = async (
       res.status(404).send({ message: "Хоол олдсонгүй" });
       return;
     }
+
+    // Real-time notification to all clients
+    io.emit("foodUpdated", updatedFood);
 
     res.status(200).send({
       message: "Хоолны мэдээлэл амжилттай шинэчлэгдлээ",

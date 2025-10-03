@@ -1,6 +1,8 @@
 import express, { request, Request, Response } from "express";
 import mongoose, { Schema, model } from "mongoose";
 import cors from "cors";
+import { createServer } from "http";
+import { Server } from "socket.io";
 import { UserRouter } from "./router/user.route";
 import { CategoryRouter } from "./router/category.route";
 import { FoodRouter } from "./router/food.route";
@@ -47,8 +49,30 @@ server.use(FoodRouter);
 server.use(OrderRouter);
 server.use(AdminRouter);
 
+const httpServer = createServer(server);
+export const io = new Server(httpServer, {
+  cors: {
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (origin.includes("localhost") || origin.includes("vercel.app")) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log("Client connected:", socket.id);
+  socket.on("disconnect", () => {
+    console.log("Client disconnected:", socket.id);
+  });
+});
+
 const PORT = process.env.PORT || 8000;
 
-server.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`running on http://localhost:${PORT}`);
 });

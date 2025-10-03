@@ -11,7 +11,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import {
   Dialog,
@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { useAuth } from "./UserProvider";
 import axios from "axios";
+import { io, Socket } from "socket.io-client";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -43,58 +44,25 @@ export const Header = () => {
   const [cartCount, setCartCount] = useState(0);
   const [showDeliveredModal, setShowDeliveredModal] = useState(false);
   const { user } = useAuth();
-  const previousOrderStatusesRef = useRef<Map<string, string>>(new Map());
 
-  // Polling for order status changes
-  const checkOrderStatus = useCallback(async () => {
-    if (!user?.userId) return;
-
-    try {
-      const { data } = await axios.get(
-        `${API_BASE}/getOrder?userId=${user.userId}`
-      );
-
-      const newOrders = data.orders;
-      const previousStatuses = previousOrderStatusesRef.current;
-
-      if (previousStatuses.size > 0) {
-        newOrders.forEach((newOrder: any) => {
-          const prevStatus = previousStatuses.get(newOrder._id);
-
-          if (
-            prevStatus &&
-            prevStatus !== "Delivered" &&
-            newOrder.status === "Delivered"
-          ) {
-            setShowDeliveredModal(true);
-          }
-
-          previousStatuses.set(newOrder._id, newOrder.status);
-        });
-      } else {
-        newOrders.forEach((order: any) => {
-          previousStatuses.set(order._id, order.status);
-        });
-      }
-    } catch (error) {
-      // Silent fail if not logged in
-    }
-  }, [user]);
-
-  // Polling effect
+  // Socket.io for real-time order status updates
   useEffect(() => {
     if (!user?.userId) return;
 
-    const intervalId = setInterval(() => {
-      checkOrderStatus();
-    }, 3000);
+    const socket: Socket = io(API_BASE);
+
+    socket.on("orderStatusChanged", (data: any) => {
+      if (data.userId === user.userId && data.newStatus === "Delivered") {
+        setShowDeliveredModal(true);
+      }
+    });
 
     return () => {
-      clearInterval(intervalId);
+      socket.disconnect();
     };
-  }, [user, checkOrderStatus]);
+  }, [user]);
 
-  // Listen for delivery notifications
+  // Listen for delivery notifications (from other components)
   useEffect(() => {
     const handleDeliveryNotification = () => {
       setShowDeliveredModal(true);
@@ -106,14 +74,22 @@ export const Header = () => {
     };
   }, []);
 
+  // Update email when user changes
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (user?.email) {
+      setEmail(user.email);
+    } else {
       const storedEmail = localStorage.getItem("email");
       if (storedEmail) {
         setEmail(storedEmail);
+      } else {
+        setEmail("");
       }
-      console.log(storedEmail, "ddd");
+    }
+  }, [user]);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
       // Load initial cart count
       updateCartCount();
 
@@ -212,37 +188,52 @@ export const Header = () => {
               <PopoverTrigger asChild>
                 <User className="bg-[#EF4444] rounded-full h-[36px] w-[36px] cursor-pointer" />
               </PopoverTrigger>
-              <PopoverContent>
-                <div className="mt-10 rounded-md w-[188px] bg-[#FFFFFF]">
-                  {user?.userId ? (
-                    <div className="flex flex-col items-center justify-center gap-3 py-3">
-                      <p className="text-sm">{email}</p>
-                      <Button
-                        className="bg-[#F4F4F5] rounded-full text-[#18181B] hover:bg-[#E4E4E7]"
-                        onClick={() => {
-                          localStorage.removeItem("token");
-                          localStorage.removeItem("email");
-                          setEmail("");
-                          window.location.href = "/";
-                        }}
-                      >
-                        Sign out
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center gap-3 py-3">
-                      <p className="text-sm text-gray-600">No user</p>
-                      <Button
-                        className="bg-[#EF4444] rounded-full text-white hover:bg-[#DC2626]"
-                        onClick={() => {
-                          window.location.href = "/login";
-                        }}
-                      >
-                        Login
-                      </Button>
-                    </div>
-                  )}
-                </div>
+              <PopoverContent className="w-[160px] p-3">
+                {user?.userId ? (
+                  <div className="flex flex-col gap-2">
+                    <p className="text-xs font-medium text-gray-700 truncate text-center">
+                      {email}
+                    </p>
+                    <Button
+                      size="sm"
+                      className="w-full bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 h-8 text-xs"
+                      onClick={() => {
+                        localStorage.removeItem("token");
+                        localStorage.removeItem("email");
+                        localStorage.removeItem("userId");
+                        setEmail("");
+                        window.location.href = "/";
+                      }}
+                    >
+                      Sign out
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    <p className="text-xs text-center text-gray-500 mb-1 leading-tight">
+                      Та бүртгэлээрээ нэвтэрч орно уу, бүртгэлгүй бол бүртгүүлнэ
+                      үү
+                    </p>
+                    <Button
+                      size="sm"
+                      className="w-full bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 h-8 text-xs"
+                      onClick={() => {
+                        window.location.href = "/login";
+                      }}
+                    >
+                      Login
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="w-full bg-gray-900 rounded-md text-white hover:bg-gray-800 h-8 text-xs"
+                      onClick={() => {
+                        window.location.href = "/signup";
+                      }}
+                    >
+                      Sign up
+                    </Button>
+                  </div>
+                )}
               </PopoverContent>
             </Popover>
           </div>

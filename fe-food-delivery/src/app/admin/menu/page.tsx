@@ -10,7 +10,7 @@ const MenuHomepage = () => {
         <GetCategory />
       </div>
 
-      <FoodType foods={{}} />
+      <FoodType />
     </div>
   );
 };

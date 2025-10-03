@@ -15,6 +15,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 type UserData = {
   userId: string;
   isAdmin: boolean;
+  email?: string;
 };
 type AuthContextType = {
   user: UserData | null;
@@ -45,6 +46,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       setUser({
         userId: response.data.destructToken.userId,
         isAdmin: response.data.destructToken.isAdmin,
+        email: response.data.destructToken.email,
       });
     } catch (err: any) {
       console.error("Token verification failed:", err);

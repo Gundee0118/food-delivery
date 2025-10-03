@@ -37,6 +37,7 @@ export const Mycard = () => {
   const [address, setAddress] = useState("");
   const [isAddressInvalid, setIsAddressInvalid] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [activeTab, setActiveTab] = useState("account");
 
   useEffect(() => {
     const loadCartData = () => {
@@ -95,8 +96,6 @@ export const Mycard = () => {
     updateCart(updateItems);
   };
   const checkOutSubmit = async () => {
-    console.log("is being called");
-
     // Check if user is logged in
     if (!user?.userId) {
       setShowLoginModal(true);
@@ -120,7 +119,6 @@ export const Mycard = () => {
       0.99;
 
     const token = localStorage.getItem("token");
-    console.log(token, "from checkout");
 
     try {
       const res = await axios.post(
@@ -137,7 +135,6 @@ export const Mycard = () => {
           },
         }
       );
-      console.log(res, "axios is called");
 
       alert("Захиалга амжилттай илгээгдлээ");
 
@@ -149,7 +146,7 @@ export const Mycard = () => {
       window.dispatchEvent(new CustomEvent("orderUpdated"));
     } catch (error) {
       alert("Захиалга илгээхэд алдаа гарлаа");
-      console.error(error, "//saaxaaxa");
+      console.error(error);
     }
   };
 
@@ -170,7 +167,17 @@ export const Mycard = () => {
               <ShoppingCart className="h-5 w-5" />
               <span className="text-lg font-semibold">Order detail</span>
             </div>
-            <Tabs defaultValue="account" className="w-full">
+            <Tabs
+              value={activeTab}
+              onValueChange={(value) => {
+                setActiveTab(value);
+                // Tab өөрчлөгдөхөд cartUpdated event trigger хийх
+                if (value === "password") {
+                  window.dispatchEvent(new CustomEvent("cartUpdated"));
+                }
+              }}
+              className="w-full"
+            >
               <TabsList className="grid w-full grid-cols-2 mb-6 mx-auto max-w-xs">
                 <TabsTrigger
                   value="account"

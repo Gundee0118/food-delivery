@@ -1,10 +1,11 @@
 "use client";
 import axios from "axios";
 import { MapPin, Soup, Timer } from "lucide-react";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "./UserProvider";
 import { Payment } from "./Payment";
 import { format } from "date-fns";
+import { io, Socket } from "socket.io-client";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -29,49 +30,53 @@ type OrderType = {
 export const PendingDelivered = () => {
   const { user } = useAuth();
   const [orders, setOrders] = useState<OrderType[]>([]);
-  const previousOrderStatusesRef = useRef<Map<string, string>>(new Map());
+  const [loading, setLoading] = useState(true);
 
   const getOrders = useCallback(async () => {
-    if (!user?.userId) return;
+    if (!user?.userId) {
+      setOrders([]);
+      setLoading(false);
+      return;
+    }
 
+    setLoading(true);
     try {
       const { data } = await axios.get(
         `${API_BASE}/getOrder?userId=${user.userId}`
       );
-
-      const newOrders = data.orders;
-      const previousStatuses = previousOrderStatusesRef.current;
-
-      // Check for status changes
-      newOrders.forEach((newOrder: OrderType) => {
-        const prevStatus = previousStatuses.get(newOrder._id);
-
-        if (
-          prevStatus &&
-          prevStatus !== "Delivered" &&
-          newOrder.status === "Delivered"
-        ) {
-          // Trigger delivery notification event
-          window.dispatchEvent(new CustomEvent("orderDelivered"));
-        }
-
-        // Update status in ref
-        previousStatuses.set(newOrder._id, newOrder.status);
-      });
-
-      setOrders(newOrders);
+      setOrders(data.orders);
     } catch (error) {
       console.error("Захиалга авахад алдаа гарлаа:", error);
+    } finally {
+      setLoading(false);
     }
   }, [user]);
 
   useEffect(() => {
-    if (user?.userId) {
-      getOrders();
-    }
+    getOrders();
   }, [user, getOrders]);
 
-  // Listen for order updates
+  // Socket.io for real-time updates
+  useEffect(() => {
+    if (!user?.userId) return;
+
+    const socket: Socket = io(API_BASE);
+
+    socket.on("orderStatusChanged", (data: any) => {
+      if (data.userId === user.userId) {
+        getOrders(); // Refresh order list
+        if (data.newStatus === "Delivered") {
+          window.dispatchEvent(new CustomEvent("orderDelivered"));
+        }
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [user, getOrders]);
+
+  // Listen for order updates (from checkout)
   useEffect(() => {
     const handleOrderUpdate = () => {
       if (user?.userId) {
@@ -85,25 +90,19 @@ export const PendingDelivered = () => {
     };
   }, [user, getOrders]);
 
-  // Polling for real-time order status updates
-  useEffect(() => {
-    if (!user?.userId) return;
-
-    const intervalId = setInterval(() => {
-      getOrders();
-    }, 3000);
-
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [user, getOrders]);
-
   return (
     <div className="bg-white rounded-lg p-6">
       <h2 className="text-lg font-semibold text-gray-700 mb-4">
         Order history
       </h2>
-      {orders.length === 0 ? (
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-10 h-10 border-4 border-gray-900 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-gray-600 text-sm">Loading orders...</p>
+          </div>
+        </div>
+      ) : orders.length === 0 ? (
         <div className="flex flex-col gap-6">
           <div className="text-center py-12">
             <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center">
@@ -162,7 +161,7 @@ export const PendingDelivered = () => {
                         <div key={itemIndex} className="flex justify-between">
                           <div className="text-[12px] flex gap-2 text-[#71717A]">
                             <Soup className="h-[16px] w-[16px]" />
-                            {item.food.foodName}
+                            {item.food?.foodName || "Unknown food"}
                           </div>
                           <div className="text-[12px] text-[#09090B]">
                             x{item.quantity}
